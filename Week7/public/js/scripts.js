@@ -1,0 +1,80 @@
+// Initialize Socket.IO client
+const socket = io();
+
+const clickMe = () => {
+    alert("Thanks for clicking me. Hope you have a nice day!")
+}
+
+const submitForm = () => {
+    let formData = {};
+    formData.first_name = $('#first_name').val();
+    formData.last_name = $('#last_name').val();
+    formData.password = $('#password').val();
+    formData.email = $('#email').val();
+    console.log("Form Data Submitted: ", formData);
+}
+
+const addCards = (items) => {
+    items.forEach(item => {
+        let itemToAppend = '<div class="col s4 center-align">' +
+            '<div class="card medium"><div class="card-image waves-effect waves-block waves-light"><img class="activator" src="' + item.image + '">' +
+            '</div><div class="card-content">' +
+            '<span class="card-title activator grey-text text-darken-4">' + item.title + '<i class="material-icons right">more_vert</i></span><p><a href="#">' + item.link + '</a></p></div>' +
+            '<div class="card-reveal">' +
+            '<span class="card-title grey-text text-darken-4">' + item.title + '<i class="material-icons right">close</i></span>' +
+            '<p class="card-text">' + item.description + '</p>' +
+            '</div></div></div>';
+        $("#card-section").append(itemToAppend)
+    });
+    console.log("All items: ", items);
+}
+
+const getProjects = () => {
+  $.get('/api/projects', response => {
+    if (response.statusCode === 200) {
+      addCards(response.data);
+    }
+  });
+};
+
+$(document).ready(function () {
+    // Initialize Materialize components
+    $('.materialboxed').materialbox();
+    $('.modal').modal();
+    
+    console.log('[SIT725] materialize box is initialized');
+    
+    // Event handlers
+    $('#clickMeButton').click(() => {
+        console.log('[SIT725] The button is now clicked');
+        clickMe();
+    });
+    
+    $('#formSubmit').click(() => {
+        submitForm();
+    });
+    
+    $('#userForm').on('submit', function (event) {
+        event.preventDefault();
+        M.toast({ html: 'Form submitted!' });
+        $('#modal1').modal('close');
+    });
+    
+    // Load projects data
+    getProjects();
+});
+
+// Listen to 'number' event from server
+socket.on('number', (msg) => {
+    console.log('Random number:', msg);
+    document.getElementById('number').innerText = msg;
+});
+
+// Handle connection events
+socket.on('connect', () => {
+    console.log('Connected to server');
+});
+
+socket.on('disconnect', () => {
+    console.log('Disconnected from server');
+});
